@@ -15,6 +15,8 @@ It is generally assumed that the quality of X-ray diffraction data can be improv
 **Keywords:** multiple-crystal data collection; clustering.
 
 ##Dependencies:##
-The R Project for Statistical Computing : www.r-project.org
-RPy2 - RPy : rpy.sourceforge.net/rpy2.html
+
+The R Project for Statistical Computing : http://www.r-project.org
+
+RPy2 - RPy : http://rpy.sourceforge.net/rpy2.html
 
