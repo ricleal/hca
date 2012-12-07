@@ -9,6 +9,16 @@
 
 from PyQt4 import QtCore, QtGui
 
+__author__ = "Ricardo M. Ferraz Leal"
+__copyright__ = "Copyright 2012, European Synchrotron Radiation Facility"
+__credits__ = ["Ricardo M. Ferraz Leal", "Alexander N. Popov", "Gleb P. Bourenkov",
+                    "Sean McSweeney", "Rita Giordano"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Ricardo M. Ferraz Leal"
+__email__ = "ricardo.leal@esrf.fr"
+__status__ = "Beta"
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:

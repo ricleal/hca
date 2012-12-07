@@ -1,3 +1,11 @@
+'''
+The application of hierarchical cluster analysis to the selection of isomorphous crystals
+R. Giordano, R. M. F. Leal, G. P. Bourenkov, S. McSweeney and A. N. Popov
+Acta Cryst. (2012). D68, 649-658
+
+@author: ricardo.leal@esrf.fr
+
+'''
 
 import sys
 import os
@@ -6,6 +14,15 @@ import subprocess as sub
 import os.path
 import inspect
 
+__author__ = "Ricardo M. Ferraz Leal"
+__copyright__ = "Copyright 2012, European Synchrotron Radiation Facility"
+__credits__ = ["Ricardo M. Ferraz Leal", "Alexander N. Popov", "Gleb P. Bourenkov",
+                    "Sean McSweeney", "Rita Giordano"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Ricardo M. Ferraz Leal"
+__email__ = "ricardo.leal@esrf.fr"
+__status__ = "Beta"
 
 class Oar :
     """

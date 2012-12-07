@@ -1,12 +1,12 @@
 '''
-Created on Oct 17, 2011
+The application of hierarchical cluster analysis to the selection of isomorphous crystals
+R. Giordano, R. M. F. Leal, G. P. Bourenkov, S. McSweeney and A. N. Popov
+Acta Cryst. (2012). D68, 649-658
 
-@author: leal
-
-
-Rita dendogram auto processing
+@author: ricardo.leal@esrf.fr
 
 '''
+
 import subprocess as sub
 import sys
 import os
@@ -21,6 +21,15 @@ import oar
 from PyQt4 import QtGui, QtCore
 import clusterAnalysis
 
+__author__ = "Ricardo M. Ferraz Leal"
+__copyright__ = "Copyright 2012, European Synchrotron Radiation Facility"
+__credits__ = ["Ricardo M. Ferraz Leal", "Alexander N. Popov", "Gleb P. Bourenkov",
+                    "Sean McSweeney", "Rita Giordano"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Ricardo M. Ferraz Leal"
+__email__ = "ricardo.leal@esrf.fr"
+__status__ = "Beta"
 
 class WaitForOarToFinishThread(QtCore.QThread):
     '''
