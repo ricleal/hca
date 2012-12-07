@@ -20,3 +20,9 @@ The R Project for Statistical Computing : http://www.r-project.org
 
 RPy2 - RPy : http://rpy.sourceforge.net/rpy2.html
 
+OAR batch scheduler) : http://oar.imag.fr/
+
+##Issues##
+
+Currently, the HCA only works within the ESRF beamline environment.
+
