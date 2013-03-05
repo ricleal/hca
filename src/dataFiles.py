@@ -73,8 +73,7 @@ class DataFiles:
         self.spaceGroupNumber = None
         self.unitcell = None
         self.friedelsLaw = True # default
-        self.currentWorkingFolderPath = None
-        
+
         
     @staticmethod
     def run(command) :
@@ -309,7 +308,7 @@ class DataFiles:
             time.sleep(5)
         
         
-        xscaleFolderName = os.path.join(self.currentWorkingFolderPath,self.xscaleFolderName)
+        xscaleFolderName = self.xscaleFolderName #os.path.join(self.currentWorkingFolderPath,self.xscaleFolderName)
                 
         try :
             os.mkdir(self.xscaleFolderName)

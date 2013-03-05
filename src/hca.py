@@ -185,7 +185,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             #temp.setData(QtCore.Qt.DisplayRole, item);
             
             # TO DO: This has to work with full path:
-            temp.setText( os.path.basename(item) );
+            #temp.setText( os.path.basename(item) );
+            temp.setText( item );
             
             self.table.setItem( i, 0, temp );
             # Col 1

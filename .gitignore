@@ -37,4 +37,6 @@ nosetests.xml
 #
 *~
 
+data/XSCALE/
+
 
