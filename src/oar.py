@@ -26,7 +26,7 @@ __status__ = "Beta"
 
 class Oar :
     """
-    Creates a condor job and can launch it
+    Creates a OAR job and can launch it
     
     oarRunFolder is mandatory!
     

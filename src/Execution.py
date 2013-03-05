@@ -2,13 +2,23 @@
 Created on Dec 7, 2012
 
 @author: leal
+
+
+TODO:
+
+This will be the future Executor for MPI, multithreading or OAR
+
 '''
 
 import subprocess as sub
 import ConfigParser
 import os
 import logging
-from multiprocessing.pool import ThreadPool
+import multiprocessing.dummy as multiprocessing
+
+
+
+configFilePath = '../cfg/hca.ini'
 
 class Execution:
     '''
@@ -16,7 +26,7 @@ class Execution:
     '''
 
 
-    def __init__(self,configFileName='hca.cfg'):
+    def __init__(self,configFileName=configFilePath):
         '''
         Constructor
         '''
@@ -43,32 +53,30 @@ class ParallelExecution(Execution):
     '''
 
 
-    def __init__(self,configFileName='hca.cfg'):
+    def __init__(self,configFileName=configFilePath):
         '''
         Constructor
         Creates a pool of threads
         '''
         Execution.__init__(self,configFileName)
         nCores = self.config.getint('Common', 'cores')
-        self.threadPool = ThreadPool(nCores)
+        self.executor = multiprocessing.Pool(nCores)
+        
         self.threadList = []
     
     def execute(self, command):
         '''
         Just sends the the command to be executed in a shell
         '''
-        t = self.threadPool.Process(target=self.run, args=(command,))
-        t.start()
-        self.threadList.append(t)
-    
+        print command
+        future = self.executor.map(self.run,command)
+        
     def wait(self):
         """
         Waits for all threads to complete their job
         """
         # Start all threads
-        [t.join() for t in self.threadList]
-        del self.threadList[:]
-        
+        pass
         
     
     
@@ -94,7 +102,7 @@ if __name__ == "__main__":
     
     for i in range(8):
         p.execute('python ~/workspace/PyTests/src/speedTest.py')
-    p.wait()
+    
     t_end = datetime.now()
     t_total = t_end - t_start
     
