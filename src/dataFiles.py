@@ -97,19 +97,21 @@ class DataFiles:
     def retrieveFolderList(self,pattern):
         """
         """
-        path  = os.path.join(self.currentWorkingFolderPath,pattern)
+        #path  = os.path.join(self.currentWorkingFolderPath,pattern)
+        path = pattern
         lsResult = DataFiles.run("ls -d " + path)
         return lsResult.rstrip('\n').split('\n')
     
-    def getSymmetryFromXdsXklFile(self,folderName):
+    def getSymmetryFromXdsXklFile(self,filename):
         """
         Will parse XDS file and get unit cell and space group number
         """
-        print folderName
+        print filename
         print self.xdsIniFileName
         print "***"
         
-        xdsFilePath = os.path.join(folderName,self.xdsIniFileName)
+        #xdsFilePath = os.path.join(folderName,self.xdsIniFileName)
+        xdsFilePath = os.path.abspath(filename)
         print 'Parsing xds file: %s' % xdsFilePath
         
         # put file contents in list of lines

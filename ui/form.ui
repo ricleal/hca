@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>711</height>
+    <width>799</width>
+    <height>801</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,35 +17,35 @@
    <widget class="QPushButton" name="pushButtonRefDSPattern">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>60</y>
-      <width>121</width>
+      <x>270</x>
+      <y>20</y>
+      <width>211</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Get Ref Data set</string>
+     <string>Get Reference Data set</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEditRefDsPattern">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
-      <width>171</width>
+      <y>20</y>
+      <width>241</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
-     <string>xds_*</string>
+     <string>xds_*/XDS.INP</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBoxRefDS">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>10</x>
       <y>60</y>
-      <width>351</width>
+      <width>471</width>
       <height>25</height>
      </rect>
     </property>
@@ -53,21 +53,21 @@
    <widget class="QLineEdit" name="lineEditRemainingDSsPattern">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>180</y>
-      <width>191</width>
+      <x>10</x>
+      <y>160</y>
+      <width>241</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
-     <string>xds_*</string>
+     <string>xds_*/XDS_ASCII.HKL</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonRemainingDSsPattern">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>210</y>
+      <x>270</x>
+      <y>160</y>
       <width>191</width>
       <height>27</height>
      </rect>
@@ -80,8 +80,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>160</y>
-      <width>571</width>
+      <y>210</y>
+      <width>771</width>
       <height>231</height>
      </rect>
     </property>
@@ -93,7 +93,7 @@
     </property>
     <column>
      <property name="text">
-      <string>Folder name</string>
+      <string>Data Set</string>
      </property>
     </column>
     <column>
@@ -116,7 +116,7 @@
    <widget class="QPushButton" name="pushButtonCellDetails">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>510</x>
       <y>60</y>
       <width>111</width>
       <height>27</height>
@@ -175,7 +175,7 @@
    <widget class="QPushButton" name="pushButtonProcessRefDS">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>600</x>
       <y>110</y>
       <width>161</width>
       <height>27</height>
@@ -188,8 +188,8 @@
    <widget class="QPushButton" name="pushButtonProcessAllDS">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>360</y>
+      <x>380</x>
+      <y>450</y>
       <width>191</width>
       <height>27</height>
      </rect>
@@ -202,8 +202,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>400</y>
-      <width>781</width>
+      <y>490</y>
+      <width>771</width>
       <height>251</height>
      </rect>
     </property>
@@ -211,10 +211,10 @@
    <widget class="QLineEdit" name="lineEditResolution">
     <property name="geometry">
      <rect>
-      <x>720</x>
-      <y>330</y>
+      <x>290</x>
+      <y>450</y>
       <width>71</width>
-      <height>25</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -227,8 +227,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>340</y>
+      <x>170</x>
+      <y>460</y>
       <width>111</width>
       <height>16</height>
      </rect>
@@ -279,34 +279,11 @@
      <string>False</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEditWorkingFolder">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>781</width>
-      <height>27</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>171</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Working folder:</string>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="checkBoxNedit">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>300</y>
+      <x>10</x>
+      <y>460</y>
       <width>191</width>
       <height>22</height>
      </rect>
@@ -321,7 +298,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>801</width>
+     <width>799</width>
      <height>25</height>
     </rect>
    </property>

@@ -57,8 +57,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         # initialise auxiliary class
         self.data = dataFiles.DataFiles()
-        self.lineEditWorkingFolder.setText(os.getcwd())
-        self.updateCurrentWorkingFolder()
         
         # About
         self.popDialog=myDialog()
@@ -79,8 +77,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         """ LOGGER """
         self.textBrowser.insertHtml('<font color="red"><b>' + text + '</b></font><br>')            
                 
-    def updateCurrentWorkingFolder(self):
-        self.data.currentWorkingFolderPath = str(self.lineEditWorkingFolder.text()) 
     
     def searchRefDSs(self):
         """
@@ -92,8 +88,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         if  self.comboBoxRefDS.count() > 0 :
             self.comboBoxRefDS.clear()
         #self.comboBoxRefDS.addItems(lsResult)
-        for i in lsResult:
-            self.comboBoxRefDS.addItem(os.path.basename(i),QtCore.QVariant(i))
+        commonprefix = os.path.commonprefix(lsResult)
+        if not os.path.isdir(commonprefix):
+            commonprefix = '.'
+
+        for f in lsResult:
+            #self.comboBoxRefDS.addItem(os.path.basename(f),QtCore.QVariant(f))
+            self.comboBoxRefDS.addItem(os.path.relpath(f,commonprefix),QtCore.QVariant(f))
         
     
     def getRefDSSymmetry(self):
@@ -129,7 +130,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.logE('Reference DS empty... have you clicked Ref DSs?')
             return
         
-        self.log('<p>Processing Reference Datasets: %s</p><br>'%refDS)
+        self.log('<p>Processing Reference Datasets: %s</p>'%refDS)
         
         if self.lineEditUnitCell.text() is not None and len(str(self.lineEditUnitCell.text()).strip()) > 0 :
             self.data.unitcell = [float(i) for i in str(self.lineEditUnitCell.text()).strip().split()]
