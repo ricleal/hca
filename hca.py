@@ -67,7 +67,18 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         print "openAbout"
         self.popDialog.show()
 
-#            
+    def log(self,text):
+        """ LOGGER """
+        self.textBrowser.insertHtml(text + '<br>')
+        
+    def logW(self,text):
+        """ LOGGER warning """
+        self.textBrowser.insertHtml('<b>' + text + '</b><br>')
+
+    def logE(self,text):
+        """ LOGGER """
+        self.textBrowser.insertHtml('<font color="red"><b>' + text + '</b></font><br>')            
+                
     def updateCurrentWorkingFolder(self):
         self.data.currentWorkingFolderPath = str(self.lineEditWorkingFolder.text()) 
     
@@ -76,7 +87,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         """
         pattern = str(self.lineEditRefDsPattern.text())
         # TODO
-        self.textBrowser.insertHtml('Searching Reference Datasets<br>')
+        self.log('Searching Reference Datasets')
         lsResult = self.data.retrieveFolderList(pattern) 
         if  self.comboBoxRefDS.count() > 0 :
             self.comboBoxRefDS.clear()
@@ -93,9 +104,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         currentDS = str(self.comboBoxRefDS.itemData(currentIndex).toString())
         
         if len(currentDS) == 0 :
-            self.textBrowser.insertHtml('<font color="red"><b>Reference Data set empty... Have you clicked "Get Ref Data set"?</b></font><br>')
+            self.logE('Reference Data set empty... Have you clicked "Get Ref Data set"?')
             return
-        self.textBrowser.insertHtml('Getting symmetry from Reference Dataset: <b>%s</b><br>'%currentDS)
+        self.log('Getting symmetry from Reference Dataset: <b>%s</b>'%currentDS)
         self.data.getSymmetryFromXdsXklFile(currentDS)
         # populate
         unitCellTxt = ""
@@ -115,10 +126,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         refDS = str(self.comboBoxRefDS.currentText())
         
         if len(refDS) == 0 :
-            self.textBrowser.insertHtml('<b>Reference DS empty... have you clicked Ref DSs?</b><br>')
+            self.logE('Reference DS empty... have you clicked Ref DSs?')
             return
         
-        self.textBrowser.insertHtml('<p>Processing Reference Datasets: %s</p><br>'%refDS)
+        self.log('<p>Processing Reference Datasets: %s</p><br>'%refDS)
         
         if self.lineEditUnitCell.text() is not None and len(str(self.lineEditUnitCell.text()).strip()) > 0 :
             self.data.unitcell = [float(i) for i in str(self.lineEditUnitCell.text()).strip().split()]
@@ -140,11 +151,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             print 'ERRROR radioButtonFriedelTrue...'
         
         if self.data.unitcell is not None and self.data.spaceGroupNumber is not None:
-            self.textBrowser.insertHtml('Modifying XDS file %s. New Symmetry: <b>%s</b> : <b>%s</b><br>'%(refDS,self.lineEditUnitCell.text(),
+            self.log('Modifying XDS file %s. New Symmetry: <b>%s</b> : <b>%s</b>'%(refDS,self.lineEditUnitCell.text(),
                                                                                             self.data.spaceGroupNumber))
             self.data.modifyCellAndSgInXdsIniFile(refDS)
         else :
-            self.textBrowser.insertHtml('<b>%s data set submit to XDS as it is....<b><br>'%refDS)
+            self.logW('%s data set submit to XDS as it is....'%refDS)
         self.data.processXdsJob(refDS)
         
         # thread to plot OAR Status 
@@ -158,7 +169,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         pattern = str(self.lineEditRemainingDSsPattern.text())
         # TODO
-        self.textBrowser.insertHtml('Searching Remaining Datasets<br><b>HINT: </b> Click on the column header to select the whole column.')
+        self.log('Searching Remaining Datasets<br><b>HINT: </b> Click on the column header to select the whole column.')
         lsResult = self.data.retrieveFolderList(pattern)
         
         self.table.setRowCount(len(lsResult));
@@ -184,7 +195,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             checkBox.setCheckState(QtCore.Qt.Checked)  
             self.table.setCellWidget(i,2,checkBox)
             
-            #self.textBrowser.insertHtml(item + '<br>')
+            #self.log(item + '<br>')
         
         #item = QtGui.QTableWidgetItem(self.tableWidget)
         self.table.resizeColumnsToContents()
@@ -244,7 +255,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             else:
                 resolution = '2.0'
                         
-            self.textBrowser.insertHtml('Running XSCALE up to <b>' + resolution + '</b> A resolution<br>')
+            self.log('Running XSCALE up to <b>' + resolution + '</b> A resolution')
             
             
             if self.checkBoxNedit.checkState() > 0 :
@@ -257,12 +268,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     
             #self.data.includeListOfDataSetsInXscale(dataSetsToIncludeInXscale,resolution)
         else:
-            self.textBrowser.insertHtml('<b>No selected DSs to be included in XSCALE! </b><br>')
+            self.logE('No selected DSs to be included in XSCALE!')
             
     
         
     def addLineToTextBrowser(self,text):
-        self.textBrowser.insertHtml('<pre>%s<pre>'%text)
+        self.log('<pre>%s<pre>'%text)
         c =  self.textBrowser.textCursor();
         c.movePosition(QtGui.QTextCursor.End);
         self.textBrowser.setTextCursor(c);

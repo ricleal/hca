@@ -7,6 +7,10 @@ Acta Cryst. (2012). D68, 649-658
 
 @author: ricardo.leal@esrf.fr
 
+
+This is a standalone file to plot the dendrogram from a matrix file
+
+
 '''
 
 import rpy2
