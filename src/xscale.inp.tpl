@@ -1,5 +1,5 @@
 !============ XSCALE.INP : maximum user input
-! 
+!
 ! Original here : http://xds.mpimf-heidelberg.mpg.de/html_doc/INPUT_templates/XSCALE.INP
 !
 !
@@ -15,23 +15,14 @@
 !0-DOSE_SIGNIFICANCE_LEVEL=0.10
 !WFAC1=1.5 ! factor applied to e.s.d.'s before testing equivalent reflections
 
-!OUTPUT_FILE=fae-ip.ahkl                      !at minimum of f'
-OUTPUT_FILE=alldatasets.ahkl
-!  FRIEDEL'S_LAW=FALSE !TRUE
-    $friedelsLaw
+OUTPUT_FILE= $output_file
+   FRIEDEL'S_LAW= $friedels_law_value  !FALSE !TRUE
 !  MERGE=FALSE !TRUE
 !  STRICT_ABSORPTION_CORRECTION=TRUE  !FALSE is default
-!  INPUT_FILE= ../fae-ip/xds_1/XDS_ASCII.HKL
-    $inputFilePaths
+#foreach ($input_file in $input_files)
+   INPUT_FILE= $input_file
 !    INCLUDE_RESOLUTION_RANGE= 20 1.6
 !    CORRECTIONS= DECAY MODULATION ABSORPTION
 !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
 !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation
-!  INPUT_FILE= ../fae-ip/xds_2/XDS_ASCII.HKL
-!    INCLUDE_RESOLUTION_RANGE= 20 1.6
-!    CORRECTIONS= DECAY MODULATION ABSORPTION
-!    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
-!    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation
-
-
-    
+#end
