@@ -8,6 +8,8 @@ Acta Cryst. (2012). D68, 649-658
 
 @author: ricardo.leal@esrf.fr
 
+Executable that launches the Qt interface
+
 '''
 
 import sys
@@ -80,6 +82,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     
     def searchRefDSs(self):
         """
+        button pressed!
         """
         pattern = str(self.lineEditRefDsPattern.text())
         # TODO

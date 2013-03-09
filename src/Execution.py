@@ -45,8 +45,19 @@ class Execution:
             return None
         else :
             return output
+    
+    # Methods to be implemented by the children classes:
+    def init(self):
+        """ """
+        pass
+    
+    def init(self):
+        """ """
+        pass
 
-class ParallelExecution(Execution):
+    
+
+class SerialExecution(Execution):
     '''
     ParallelExecution
     
