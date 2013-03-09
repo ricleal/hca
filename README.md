@@ -26,3 +26,7 @@ OAR batch scheduler) : http://oar.imag.fr/
 
 Currently, the HCA only works within the ESRF beamline environment.
 
+##New version soon##
+
+I'm cleaning the code and working on a new version that will provide support for threading (perhaps mpi) and serial processing.
+See the development branch for more details.
