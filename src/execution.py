@@ -11,14 +11,13 @@ This will be the future Executor for MPI, multithreading or OAR
 '''
 
 import subprocess as sub
-import ConfigParser
+import sys
 import os
-import logging
-import multiprocessing.dummy as multiprocessing
 
-
-
-configFilePath = '../cfg/hca.ini'
+# local
+import config
+import log
+logger = log.setupLogger("xds")
 
 class Execution:
     '''
@@ -26,36 +25,51 @@ class Execution:
     '''
 
 
-    def __init__(self,configFileName=configFilePath):
+    def __init__(self):
         '''
         Constructor
         '''
-        self.config = ConfigParser.ConfigParser()
-        self.config.readfp(open(configFileName))
+        logger.debug("Execution init....")
     
-    def run(self,command) :
-        '''
-        Run a command in the shell
-        @return: None if Error, otherwise the output
-        '''
+    @staticmethod
+    def run(command) :
         p = sub.Popen(command, stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
         output, errors = p.communicate()
         if errors is not None and len(errors) > 0 :
-            logging.error(errors)
-            return None
-        else :
-            return output
+            sys.stderr.write(errors)
+        return p.pid, output
+    
+    @staticmethod
+    def checkIfPidExists(pid):        
+        """ 
+        Check For the existence of a unix pid. 
+        Sending signal 0 to a pid will raise an OSError exception if the 
+        pid is not running, and do nothing otherwise.
+        """
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
     
     # Methods to be implemented by the children classes:
     def init(self):
         """ """
         pass
     
-    def init(self):
+    def execute(self):
         """ """
         pass
 
-    
+    def wait(self):
+        """ """
+        pass
+
+    def finish(self):
+        """ """
+        pass
+
 
 class SerialExecution(Execution):
     '''
@@ -64,23 +78,18 @@ class SerialExecution(Execution):
     '''
 
 
-    def __init__(self,configFileName=configFilePath):
+    def __init__(self):
         '''
         Constructor
         Creates a pool of threads
         '''
-        Execution.__init__(self,configFileName)
-        nCores = self.config.getint('Common', 'cores')
-        self.executor = multiprocessing.Pool(nCores)
-        
-        self.threadList = []
+        pass
     
     def execute(self, command):
         '''
         Just sends the the command to be executed in a shell
         '''
-        print command
-        future = self.executor.map(self.run,command)
+        pass
         
     def wait(self):
         """
@@ -106,16 +115,7 @@ class OarExecution(Execution):
 
 
 if __name__ == "__main__":
-    from datetime import datetime
+    pid,out = Execution.run('sleep 5')
+    print pid
     
-    p = ParallelExecution()
-    t_start = datetime.now()
     
-    for i in range(8):
-        p.execute('python ~/workspace/PyTests/src/speedTest.py')
-    
-    t_end = datetime.now()
-    t_total = t_end - t_start
-    
-    print "Total time: ", t_total
-    print "Main has finished!"

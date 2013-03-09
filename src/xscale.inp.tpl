@@ -1,8 +1,11 @@
-!============ XSCALE.INP : maximum user input
+! XSCALE.INP : file written by XdsHandler on the $date
 !
-! Original here : http://xds.mpimf-heidelberg.mpg.de/html_doc/INPUT_templates/XSCALE.INP
+! based on : http://xds.mpimf-heidelberg.mpg.de/html_doc/INPUT_templates/XSCALE.INP
+! 
+! Feel free to uncomment the lines below
 !
-!
+
+
 !MAXIMUM_NUMBER_OF_PROCESSORS=16
 !RESOLUTION_SHELLS= 10 6 4 3 2.5 2.0 1.8 1.7 1.6
 !SPACE_GROUP_NUMBER=19
@@ -21,7 +24,7 @@ OUTPUT_FILE= $output_file
 !  STRICT_ABSORPTION_CORRECTION=TRUE  !FALSE is default
 #foreach ($input_file in $input_files)
    INPUT_FILE= $input_file
-!    INCLUDE_RESOLUTION_RANGE= 20 1.6
+     INCLUDE_RESOLUTION_RANGE= 100 $resolution_limit
 !    CORRECTIONS= DECAY MODULATION ABSORPTION
 !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
 !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation
