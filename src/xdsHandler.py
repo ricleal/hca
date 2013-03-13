@@ -36,8 +36,13 @@ class XdsHandler :
     
     def __init__(self,path) :
         """
-        @param path : place where the XDS files are 
+        @param path : folder where the XDS files are
         """
+        
+        # make sure that path is a folder
+        if not os.path.isdir(path):
+            path =  os.path.dirname(path)
+        
 
         self.xdsInpFilePath = os.path.join(path,
                                            config.Config().getPar("XDS","inp_file_name"))
@@ -240,7 +245,7 @@ if __name__ == "__main__":
     # Copy files to test if this is working!     
     shutil.copy("../data/xds_x2_run1_1/XDS.INP", "/tmp/")
     shutil.copy("../data/xds_x2_run1_1/XDS_ASCII.HKL", "/tmp/")
-    shutil.copy("../data/XSCALE/XSCALE.LP", "/tmp/XSCALE/")
+    #shutil.copy("../data/XSCALE/XSCALE.LP", "/tmp/XSCALE/")
     
     # Fun starts here
     xds = XdsHandler('/tmp')

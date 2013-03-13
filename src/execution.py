@@ -17,7 +17,20 @@ import os
 # local
 import config
 import log
-logger = log.setupLogger("xds")
+logger = log.setupLogger('exec')
+
+def getClass( className, argsToConstructor=None ):
+    '''
+    returns a class instance given a name
+    :param className : class name 
+    :type className : str
+    
+    '''
+    if argsToConstructor is None:
+        return globals()[className]()    
+    else:
+        return globals()[className](argsToConstructor)
+
 
 class Execution:
     '''
@@ -77,12 +90,11 @@ class SerialExecution(Execution):
     
     '''
 
-
     def __init__(self):
         '''
         Constructor
-        Creates a pool of threads
         '''
+        print "Constructor SerialExecution"
         pass
     
     def execute(self, command):
@@ -95,9 +107,10 @@ class SerialExecution(Execution):
         """
         Waits for all threads to complete their job
         """
-        # Start all threads
         pass
-        
+    def finish(self):
+        """ """
+        pass        
     
     
 
@@ -115,7 +128,11 @@ class OarExecution(Execution):
 
 
 if __name__ == "__main__":
-    pid,out = Execution.run('sleep 5')
+    
+    # Serial
+    serial = getClass('SerialExecution')
+    
+    pid,out = serial.run('sleep 1')
     print pid
     
     
