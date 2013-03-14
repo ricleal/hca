@@ -14,13 +14,19 @@ Executable that launches the Qt interface
 
 import sys
 from PyQt4 import QtGui, QtCore
-from form import Ui_MainWindow
 import dataFiles
 import threading
 import time
 import spaceGroups as sg
 import os
+import glob
+# local imports
 import about
+import controller
+from form import Ui_MainWindow
+import config
+import log
+logger = log.setupLogger("hca")
 
 __author__ = "Ricardo M. Ferraz Leal"
 __copyright__ = "Copyright 2012, European Synchrotron Radiation Facility"
@@ -32,7 +38,10 @@ __maintainer__ = "Ricardo M. Ferraz Leal"
 __email__ = "ricardo.leal@esrf.fr"
 __status__ = "Beta"
 
-class myDialog(QtGui.QDialog, about.Ui_DialogAbout):
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+  
+class AboutDialog(QtGui.QDialog, about.Ui_DialogAbout):
     """
     about dialog class
     """
@@ -59,9 +68,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         # initialise auxiliary class
         self.data = dataFiles.DataFiles()
-        
+        self.ctrl = controller.Controller()
+        # initialise gui text fields
+        self.lineEditRefDsPattern.setText(config.Config().getPar("Common","find_ref_pattern"))
+        self.lineEditRemainingDSsPattern.setText(config.Config().getPar("Common","find_remaining_pattern"))
         # About
-        self.popDialog=myDialog()
+        self.popDialog=AboutDialog()
         
     def openAbout(self):
         print "openAbout"
@@ -70,38 +82,46 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     def log(self,text):
         """ LOGGER """
         self.textBrowser.insertHtml(text + '<br>')
+        logger.info(text)
+        
         
     def logW(self,text):
         """ LOGGER warning """
         self.textBrowser.insertHtml('<b>' + text + '</b><br>')
+        logger.warning(text)
+        
 
     def logE(self,text):
         """ LOGGER """
         self.textBrowser.insertHtml('<font color="red"><b>' + text + '</b></font><br>')            
-                
+        logger.error(text)
     
     def searchRefDSs(self):
         """
-        button pressed!
+        Get ref datasets button pressed!
+        Populate the drop box with ref datasets
         """
         pattern = str(self.lineEditRefDsPattern.text())
-        # TODO
+        
         self.log('Searching Reference Datasets')
-        lsResult = self.data.retrieveFolderList(pattern) 
+        
+        fileList = glob.glob(pattern)
+         
         if  self.comboBoxRefDS.count() > 0 :
             self.comboBoxRefDS.clear()
-        #self.comboBoxRefDS.addItems(lsResult)
-        commonprefix = os.path.commonprefix(lsResult)
+        #self.comboBoxRefDS.addItems(fileList)
+        commonprefix = os.path.commonprefix(fileList)
         if not os.path.isdir(commonprefix):
             commonprefix = '.'
 
-        for f in lsResult:
+        for f in fileList:
             #self.comboBoxRefDS.addItem(os.path.basename(f),QtCore.QVariant(f))
             self.comboBoxRefDS.addItem(os.path.relpath(f,commonprefix),QtCore.QVariant(f))
         
     
     def getRefDSSymmetry(self):
         """
+        Reads the XDS.INP from the ref ds a populates the fields
         """
         #currentDS = str(self.comboBoxRefDS.currentText())
         currentIndex = self.comboBoxRefDS.currentIndex()
@@ -111,14 +131,14 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.logE('Reference Data set empty... Have you clicked "Get Ref Data set"?')
             return
         self.log('Getting symmetry from Reference Dataset: <b>%s</b>'%currentDS)
-        self.data.getSymmetryFromXdsXklFile(currentDS)
-        # populate
-        unitCellTxt = ""
-        for i in self.data.unitcell:
-            unitCellTxt += "%.1f " % i
-        self.lineEditUnitCell.setText(unitCellTxt)
-        self.lineEditSpaceGroup.setText(str(self.data.spaceGroupNumber))
-        if self.data.friedelsLaw is False:
+        
+        
+        # it Returns by default : ['SPACE_GROUP_NUMBER', 'UNIT_CELL_CONSTANTS', "FRIEDEL'S_LAW"]
+        sg,uc,fl = self.ctrl.getDetailsFromInpFile(currentDS)
+        
+        self.lineEditUnitCell.setText(uc)
+        self.lineEditSpaceGroup.setText(sg)
+        if str2bool(fl) is False:
             self.radioButtonFriedelFalse.setChecked(True)
         else :
             self.radioButtonFriedelTrue.setChecked(True)
@@ -133,33 +153,42 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.logE('Reference DS empty... have you clicked Ref DSs?')
             return
         
-        self.log('<p>Processing Reference Datasets: %s</p>'%refDS)
+        self.log('Processing Reference Datasets: <pre>%s</pre>'%refDS)
+        
+        paramsDict = {}
         
         if self.lineEditUnitCell.text() is not None and len(str(self.lineEditUnitCell.text()).strip()) > 0 :
-            self.data.unitcell = [float(i) for i in str(self.lineEditUnitCell.text()).strip().split()]
+            if len(str(self.lineEditUnitCell.text()).strip().split()) != 6:
+                self.logE("Unit cell format is not valid! Use: a b c alpha beta gamma")
+                return
+        paramsDict['UNIT_CELL_CONSTANTS'] = self.lineEditUnitCell.text()
         
         if self.lineEditSpaceGroup.text() is not None and len(str(self.lineEditSpaceGroup.text()).strip()) > 0 :
             try :
-                self.data.spaceGroupNumber = int(str(self.lineEditSpaceGroup.text()).strip())
+                # just to see if SG is a int
+                sgNumber = int(str(self.lineEditSpaceGroup.text()).strip())
             except:
                 sgStr = str(self.lineEditSpaceGroup.text()).strip()
-                sgInt = sg.SpaceGroups.getSpaceGroupNumber(sgStr)
-                self.data.spaceGroupNumber = sgInt
-                print "Converted to spacegroup:", sgStr, ' --> ', sgInt
+                sgNumber = sg.SpaceGroups.getSpaceGroupNumber(sgStr)
+                if sgNumber is None : 
+                    self.logE("The space group is not valid!")
+                    return
+                self.log("Converted to Space Group:  %s  --> %d" %( sgStr, sgNumber))
+        
+        paramsDict['SPACE_GROUP_NUMBER'] = sgNumber
         
         if self.radioButtonFriedelFalse.isChecked() : 
-            self.data.friedelsLaw = False
+            paramsDict["FRIEDEL'S_LAW"] = 'FALSE'
         elif self.radioButtonFriedelTrue.isChecked() :
-            self.data.friedelsLaw = True
+            paramsDict["FRIEDEL'S_LAW"] = 'TRUE'
         else :
-            print 'ERRROR radioButtonFriedelTrue...'
+            self.logE('ERRROR radioButtonFriedelTrue...')
+            return
         
-        if self.data.unitcell is not None and self.data.spaceGroupNumber is not None:
-            self.log('Modifying XDS file %s. New Symmetry: <b>%s</b> : <b>%s</b>'%(refDS,self.lineEditUnitCell.text(),
-                                                                                            self.data.spaceGroupNumber))
-            self.data.modifyCellAndSgInXdsIniFile(refDS)
-        else :
-            self.logW('%s data set submit to XDS as it is....'%refDS)
+        
+        self.ctrl.modifyXdsInpFile(refDS,paramsDict)
+        # TODO 
+        ##################################################################### 
         self.data.processXdsJob(refDS)
         
         # thread to plot OAR Status 
@@ -168,17 +197,19 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
     def searchRemainingDSs(self):
         """
+        Looks for all datasets and populates the grid
         
         """
         
         pattern = str(self.lineEditRemainingDSsPattern.text())
         # TODO
         self.log('Searching Remaining Datasets<br><b>HINT: </b> Click on the column header to select the whole column.')
-        lsResult = self.data.retrieveFolderList(pattern)
         
-        self.table.setRowCount(len(lsResult));
+        fileList = glob.glob(pattern)
         
-        for i,item in enumerate(lsResult):
+        self.table.setRowCount(len(fileList));
+        
+        for i,item in enumerate(fileList):
             #model.insertRows(i, 1)
             #model.insertRow(i)
             
@@ -212,7 +243,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         Once XDS done, submit jobs to XSCALE
         """
         
-        print 'processAllDSs'
+        self.log('Processing all the selected data sets.')
         
         model =  self.table.model()
         dataSetsToIncludeInXscale = []
@@ -247,6 +278,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 #                print 'unchecked',
 #            else:
 #                print ':(',
+        
+        
+        # TODO 
+        #####################################################################
         
         if len(dataSetsToProcessInXds)>0:
             #check OAR state

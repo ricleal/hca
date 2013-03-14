@@ -39,6 +39,8 @@ class XdsHandler :
         @param path : folder where the XDS files are
         """
         
+        logger.debug("Initialising XDS Handler with : " + path)
+        
         # make sure that path is a folder
         if not os.path.isdir(path):
             path =  os.path.dirname(path)
@@ -68,6 +70,10 @@ class XdsHandler :
         """
         Put the XDS.INI file in a ordered dic : self.xdsInpDic
         """
+        if os.path.isfile(self.xdsInpFilePath) is False :
+            logger.error("File does not exist: " + self.xdsInpFilePath)
+            return
+        
         fp = open(self.xdsInpFilePath)
         for line in fp:
             commentCharacterPos = line.find('!')
@@ -84,6 +90,10 @@ class XdsHandler :
         """
         Put the XDS.INI file in a ordered dic : self.xdsInpDic
         """
+        if os.path.isfile(self.xdsHklFilePath) is False :
+            logger.error("File does not exist: " + self.xdsInpFilePath)
+            return
+        
         fp = open(self.xdsHklFilePath)
         for line in fp:
             commentCharacterPos = line.find('!')
@@ -97,6 +107,7 @@ class XdsHandler :
             splittedLine = re.split("([a-zA-Z0-9_\-'\(\)]+)=",line)
             splittedLine = [i.strip() for i in splittedLine]
             self.xdsHklDic.update(zip(splittedLine[1:][::2], splittedLine[1:][1::2]))
+            
     
     def __createBackup(self,filePath):
         """ general bakup function """

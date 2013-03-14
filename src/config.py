@@ -17,8 +17,6 @@ from ConfigParser import ConfigParser
 
 DEFAULT_INI_FILE = "../cfg/hca.ini"
 
-import log
-logger = log.setupLogger("config")
 
 
 class Singleton(type):
@@ -157,7 +155,7 @@ class Config(object):
         completeFilePath = self.testIfFileExists(value)
 
         if completeFilePath is None :
-            logger.error("Trying tro fetch a file that does not exist: " + value)
+            sys.stderr.write("Trying tro fetch a file that does not exist: " + value)
             return None
         else :
             return completeFilePath

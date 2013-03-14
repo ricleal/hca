@@ -1,7 +1,9 @@
 import logging
 import logging.config
 
-logConfFileName = "../cfg/logging.ini"
+# locals
+import config
+
     
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -51,7 +53,9 @@ class ColorFormatter(logging.Formatter):
 def setupLogger(name=None):
     """
     Initialises Logger
-    """    
+    """
+    logConfFileName = config.Config().getParTestFile("Common","log_config_file")
+
     logging.config.fileConfig(logConfFileName)
 
     if name == None :

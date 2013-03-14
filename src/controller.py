@@ -24,33 +24,22 @@ class Controller:
         '''
         pass
     
-    def getReferenceDataSets(self):
-        pattern =  config.Config().getPar("Common","find_ref_pattern")
-        dataSets = glob.glob(pattern)
-        return dataSets
-        
-    def getRemainingDataSets(self):
-        ''' Get the processed DataSets '''
-        pattern =  config.Config().getPar("Common","find_remaining_pattern")
-        dataSets = glob.glob(pattern)
-        return dataSets
-    
-    def getDetailsFromHKLFile(self,xdsFolder):
+    def getDetailsFromInpFile(self,xdsFolder,fields = ['SPACE_GROUP_NUMBER',
+                  'UNIT_CELL_CONSTANTS',
+                  "FRIEDEL'S_LAW"]):
         '''
         gets contents from XDS_ASCII.HKL File
         @returns : a list of the parameters below (same order)
         '''
-        fields = ['SPACE_GROUP_NUMBER',
-                  'UNIT_CELL_CONSTANTS',
-                  "FRIEDEL'S_LAW"]
+        
         
         xds = xdsHandler.XdsHandler(xdsFolder)
-        xds.parseXdsHklFile()
-        
+        xds.parseXdsInpFile()
+            
         returnList = []
         for f in fields:
             try:
-                returnList.append(xds.xdsHklDic[f])
+                returnList.append(xds.xdsInpDic[f])
             except KeyError:
                 sys.stderr.write("The key doesn't exist in the HKL file: " + f)
         return returnList
@@ -115,21 +104,16 @@ if __name__ == "__main__":
     
     c = Controller()
 
-    os.chdir('/tmp')    
-    logger.debug("getReferenceDataSets")
-    print c.getReferenceDataSets()
-    logger.debug("getRemainingDataSets")
-    print c.getRemainingDataSets()
+    os.chdir('/tmp')        
     
-    
-    hklFile = '/tmp/xds_x2_run1_1/XDS_ASCII.HKL'
-    print c.getDetailsFromHKLFile(hklFile)
+    inpFile = '/tmp/xds_x2_run1_1/XDS,INP'
+    print c.getDetailsFromInpFile(inpFile)
     
     logger.debug("getDetailsFromHKLFile")    
     dictFields = {'SPACE_GROUP_NUMBER' : '1',
                   'UNIT_CELL_CONSTANTS' : '10 10 10 90 90 90',
                   "FRIEDEL'S_LAW" : 'FALSE' }
-    c.modifyXdsInpFile(hklFile,dictFields)
+    c.modifyXdsInpFile(inpFile,dictFields)
     
     logger.debug("addReferenceDataSetToAllXdsInpFiles")    
     listOfDS = ['xds_x2_run3_1/XDS.INP','xds_x2_run5_1/XDS.INP','xds_x2_run7_1/XDS.INP']

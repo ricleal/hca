@@ -252,9 +252,9 @@ class SpaceGroups :
         for el in SpaceGroups.sgList :
             if el[3] ==  spaceGroupNameNoSpaces or el[6].replace(' ','') == spaceGroupName :
                 return el[0]
-        
-       
-
+        return None
+    
+    
 if __name__ == "__main__":
     
     spt = 'P 21 21 21'
