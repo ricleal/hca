@@ -14,6 +14,11 @@ import subprocess as sub
 import os.path
 import inspect
 
+import config
+import log
+logger = log.setupLogger('exec')
+
+
 __author__ = "Ricardo M. Ferraz Leal"
 __copyright__ = "Copyright 2012, European Synchrotron Radiation Facility"
 __credits__ = ["Ricardo M. Ferraz Leal", "Alexander N. Popov", "Gleb P. Bourenkov",
@@ -30,6 +35,12 @@ class Oar :
     
     oarRunFolder is mandatory!
     
+    oarJobName = 'clusterAn'
+    print 'Processing dataset: %s ' % folderName
+        oarHandler = oar.Oar(folderName)
+        jobFilePath = oarHandler.createJob(self.xdsCommand)
+        oarHandler.launchJob(jobFilePath,self.oarJobName)
+        
     """
     
     def __init__(self,oarRunFolder) :

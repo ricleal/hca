@@ -21,6 +21,8 @@ import spaceGroups as sg
 import os
 import glob
 # local imports
+
+import execution
 import about
 import controller
 from form import Ui_MainWindow
@@ -57,6 +59,29 @@ class AboutDialog(QtGui.QDialog, about.Ui_DialogAbout):
     def on_rejectButton_clicked(self):
         self.close()
 
+
+
+class LaunchXdsThread(QtCore.QThread):
+    '''
+    Thread to launch XDS
+    '''
+    def __init__(self, runFolder, parent = None):
+        QtCore.QThread.__init__(self, parent)
+        self.runFolder = runFolder
+    def run(self):
+        self.sendTextMessage("Running XDS in the path: " + self.runFolder)
+        e = execution.getClass(config.Config().getPar("Common","execution"),
+                                self.runFolder)
+        e.execute(config.Config().getPar("XDS","xds_bin"))
+        e.wait()
+        e.finish()
+        self.sendTextMessage("XDS done...")
+    
+    
+    def sendTextMessage(self,text):
+        self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(text))
+
+
 class MyApp(QtGui.QMainWindow, Ui_MainWindow): 
     """
     Main window
@@ -74,7 +99,29 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.lineEditRemainingDSsPattern.setText(config.Config().getPar("Common","find_remaining_pattern"))
         # About
         self.popDialog=AboutDialog()
+    
+    def initilise(self):
+        self.connect(self.pushButtonRefDSPattern, QtCore.SIGNAL("clicked()"),self.searchRefDSs)
+        self.connect(self.pushButtonCellDetails, QtCore.SIGNAL("clicked()"),self.getRefDSSymmetry) 
+        self.connect(self.pushButtonProcessRefDS, QtCore.SIGNAL("clicked()"),self.processRefDS)
         
+        self.connect(self.pushButtonRemainingDSsPattern, QtCore.SIGNAL("clicked()"),self.searchRemainingDSs)
+        self.connect(self.pushButtonProcessAllDS, QtCore.SIGNAL("clicked()"),self.processAllDSs)
+        
+        #About 
+        self.connect(self.actionAbout, QtCore.SIGNAL("triggered()"), self.openAbout)
+    
+        
+        # table
+        self.table.resizeColumnsToContents()
+        # header clickable
+        #self.connect(self.table.horizontalHeader(),QtCore.SIGNAL('sectionDoubleClicked(int)'),self.on_header_doubleClicked)
+        self.connect(self.table.horizontalHeader(),QtCore.SIGNAL('sectionClicked(int)'), self.selectEntireCollumn)
+        
+        # window 
+        self.setWindowTitle('Hierarchical Cluster Analysis')
+
+    
     def openAbout(self):
         print "openAbout"
         self.popDialog.show()
@@ -153,7 +200,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.logE('Reference DS empty... have you clicked Ref DSs?')
             return
         
-        self.log('Processing Reference Datasets: <pre>%s</pre>'%refDS)
+        self.log('Processing Reference data set: %s'%refDS)
         
         paramsDict = {}
         
@@ -185,14 +232,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.logE('ERRROR radioButtonFriedelTrue...')
             return
         
-        
+        # modify XDS file
         self.ctrl.modifyXdsInpFile(refDS,paramsDict)
-        # TODO 
-        ##################################################################### 
-        self.data.processXdsJob(refDS)
-        
-        # thread to plot OAR Status 
-        self.thread.start()
+    
+        # XDS Thread
+        self.lauchXdsThread = LaunchXdsThread(refDS)
+        self.connect(self.lauchXdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
+        self.lauchXdsThread.start()
         
         
     def searchRemainingDSs(self):
@@ -313,7 +359,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     
         
     def addLineToTextBrowser(self,text):
-        self.log('<pre>%s<pre>'%text)
+        self.log('%s'%text)
         c =  self.textBrowser.textCursor();
         c.movePosition(QtGui.QTextCursor.End);
         self.textBrowser.setTextCursor(c);
@@ -342,29 +388,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             
             
         
-    def initilise(self):
-        self.connect(self.pushButtonRefDSPattern, QtCore.SIGNAL("clicked()"),self.searchRefDSs)
-        self.connect(self.pushButtonCellDetails, QtCore.SIGNAL("clicked()"),self.getRefDSSymmetry) 
-        self.connect(self.pushButtonProcessRefDS, QtCore.SIGNAL("clicked()"),self.processRefDS)
-        
-        self.connect(self.pushButtonRemainingDSsPattern, QtCore.SIGNAL("clicked()"),self.searchRemainingDSs)
-        self.connect(self.pushButtonProcessAllDS, QtCore.SIGNAL("clicked()"),self.processAllDSs)
-        
-        #About 
-        self.connect(self.actionAbout, QtCore.SIGNAL("triggered()"), self.openAbout)
-    
-        # Thread
-        self.thread = dataFiles.WaitForOarToFinishThread()
-        self.connect(self.thread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
-        
-        # table
-        self.table.resizeColumnsToContents()
-        # header clickable
-        #self.connect(self.table.horizontalHeader(),QtCore.SIGNAL('sectionDoubleClicked(int)'),self.on_header_doubleClicked)
-        self.connect(self.table.horizontalHeader(),QtCore.SIGNAL('sectionClicked(int)'), self.selectEntireCollumn)
-        
-        # window 
-        self.setWindowTitle('Cluster Analysis')
     
 
 

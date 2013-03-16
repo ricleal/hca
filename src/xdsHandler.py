@@ -256,7 +256,7 @@ if __name__ == "__main__":
     # Copy files to test if this is working!     
     shutil.copy("../data/xds_x2_run1_1/XDS.INP", "/tmp/")
     shutil.copy("../data/xds_x2_run1_1/XDS_ASCII.HKL", "/tmp/")
-    #shutil.copy("../data/XSCALE/XSCALE.LP", "/tmp/XSCALE/")
+    shutil.copy("../data/XSCALE/XSCALE.LP", "/tmp/XSCALE/")
     
     # Fun starts here
     xds = XdsHandler('/tmp')
@@ -273,4 +273,5 @@ if __name__ == "__main__":
     
     xds.buildXscaleInp(['../xds1/XDS.INP','../xds2/XDS.INP','../xds3/XDS.INP','../xds4/XDS.INP'], True,1.2)
     xds.parseXscaleLpFile()
+    print xds.ccList
     xds.createCcMatrix()

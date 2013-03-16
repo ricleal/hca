@@ -59,7 +59,7 @@ class ClusterAnalysis:
         stats = importr('stats')
         
         # Open the data
-        data=robjects.r('read.table("' + self.ccMatFileName+ '")')
+        data=robjects.r('read.table("' + self.ccMatFileName+ '", header = TRUE)')
         # transpose the data's matrix
         cc=r.t(data)
         
@@ -68,6 +68,7 @@ class ClusterAnalysis:
         ## Convert thr robjects in numpy objects
         cm_np=np.array(cm)
         
+        
         # define distance function
         d = np.sqrt(1-cm_np**2)
         
@@ -75,6 +76,7 @@ class ClusterAnalysis:
         dist = np2r.numpy2ri(d)
         
         dm=robjects.r['as.matrix'](dist)
+        
         
         ## Define that dit is a distance matrix
         dist_m=stats.as_dist(dm)

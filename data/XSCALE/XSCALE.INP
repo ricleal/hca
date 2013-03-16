@@ -1,0 +1,59 @@
+!============ XSCALE.INP 
+!
+!      To activate an input parameter remove all "!" left of it.
+
+!MAXIMUM_NUMBER_OF_PROCESSORS=16
+!RESOLUTION_SHELLS= 10 6 4 3 2.5 2.0 1.8 1.7 1.6
+!SPACE_GROUP_NUMBER=19
+!UNIT_CELL_CONSTANTS=65.46 108.41 113.15   90.000  90.000  90.000
+!REIDX=-1 0 0 0    0 -1 0 0    0 0 -1 0
+!REFERENCE_DATA_SET= ../xds_x2_run8_1/XDS.INP/XDS_ASCII.HKL 
+
+!MINIMUM_I/SIGMA=3.0
+!REFLECTIONS/CORRECTION_FACTOR=50   !minimum #reflections/correction_factor
+!0-DOSE_SIGNIFICANCE_LEVEL=0.10
+
+OUTPUT_FILE=alldatasets.ahkl 
+FRIEDEL'S_LAW= FALSE
+!  MERGE=FALSE !TRUE
+!  STRICT_ABSORPTION_CORRECTION=TRUE  !FALSE is default
+  INPUT_FILE= ../xds_x2_run1_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run2_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run3_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run4_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run5_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run6_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run7_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
+  INPUT_FILE= ../xds_x2_run8_1/XDS_ASCII.HKL
+    INCLUDE_RESOLUTION_RANGE=100 2.0
+    !    CORRECTIONS= DECAY MODULATION ABSORPTION
+    !    CRYSTAL_NAME=Seleno1 !Remove first "!" to switch on 0-dose extrapolation
+    !    STARTING_DOSE=0.0  DOSE_RATE=1.0  !Use defaults for 0-dose extrapolation            
