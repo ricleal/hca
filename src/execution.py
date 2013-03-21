@@ -13,6 +13,7 @@ This will be the future Executor for MPI, multithreading or OAR
 import subprocess as sub
 import sys
 import os
+import stat  
 import threading
 from string import Template
 import inspect
@@ -152,7 +153,7 @@ class OarExecution(Execution):
         Constructor
         '''
         logger.debug("Constructor OarExecution...")
-        self.oarJobName = 'HClusterA'
+        self.oarJobName = config.Config().getPar("OAR","job_name")
     
     def __createJob(self, executable ):
         """
@@ -168,18 +169,22 @@ class OarExecution(Execution):
         
         """
         thisfileFolderPath = os.path.dirname(inspect.getfile( inspect.currentframe() ))
-        inp = open( os.path.join(thisfileFolderPath,"job.oar.tpl"), 'r')
+        inp = open( os.path.join(thisfileFolderPath,
+                                 config.Config().getParTestFile("OAR","template_job")), 'r')
         t = Template(inp.read())
         
         s = t.substitute(executable=executable)
         
-        completePath = os.path.join(self.runFolder,"job.oar.sh")
+        completePath = os.path.join(self.runFolder,
+                                    config.Config().getPar("OAR","exec_job"))
         outp = open(completePath, 'w')
         outp.write(s)
         outp.close()
         
-        os.system('chmod +x ' + completePath)
-        print "OAR: created job file: ", completePath
+        #os.system('chmod +x ' + completePath)
+        st = os.stat(completePath)
+        os.chmod(completePath, st.st_mode | stat.S_IEXEC)
+        logger.info("OAR: created job file: " + completePath)
         return completePath
     
     def __launchJob(self, jobFile,jobName):
@@ -189,15 +194,20 @@ class OarExecution(Execution):
         """  
         launchFolder = self.runFolder
         
-        print "OAR: Launching job in: " + launchFolder
+        logger.info("OAR: Launching job in: " + launchFolder)
         
         jobFilePath = os.path.join(launchFolder, os.path.basename(jobFile))
         
         if os.path.isfile(jobFilePath) :
             
-            command = "/usr/bin/oarsub  --stdout=job.oar.out --stderr=job.oar.err --name=" \
-                + jobName + " -l nodes=1/core=4,walltime=00:30:00 " + jobFilePath
-            
+            command =  config.Config().getPar("OAR","sub") + \
+            " --stdout=" + config.Config().getPar("OAR","stdout_job") + \
+            " --stderr=" + config.Config().getPar("OAR","stderr_job") + \
+            " --name="   + jobName + \
+            " -l nodes=" + config.Config().getPar("OAR","number_of_nodes") + \
+            "/core=" + config.Config().getPar("OAR","cores_per_node") + \
+            ",walltime=" + config.Config().getPar("OAR","walltime") + \
+            " " + jobFilePath
             
             logger.info("Launching job: " + command + " in " + launchFolder)
             # execute command and get output
@@ -221,7 +231,8 @@ class OarExecution(Execution):
         """
         Waits for all threads to complete their job
         """
-        command = '/usr/bin/oarstat  -u ' + getpass.getuser() + " | grep " + self.oarJobName
+        command = config.Config().getPar("OAR","stat") + ' -u ' + getpass.getuser() + \
+        " | %s %s"%(config.Config().getPar("Common","get"),self.oarJobName)
         pid,output = self.run(command)
         while output is not None and len(output)>0 :
             self.sendTextMessage(output.strip())
@@ -231,7 +242,6 @@ class OarExecution(Execution):
             time.sleep(10)
             pid,output = self.run(command)
         #self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString("OAR Job(s) finished"))
-        
         
         
     def sub_finish(self):
@@ -252,7 +262,7 @@ if __name__ == "__main__":
     serial.finish()
     
     oar = getClass('OarExecution','/tmp')
-    oar.execute('sleep 1')
+    oar.execute('ls')
     oar.wait()
     oar.finish()
     
