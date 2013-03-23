@@ -25,6 +25,7 @@ import glob
 import execution
 import about
 import controller
+import xdsHandler
 from form import Ui_MainWindow
 import config
 import log
@@ -41,6 +42,7 @@ __email__ = "ricardo.leal@esrf.fr"
 __status__ = "Beta"
 
 def str2bool(v):
+    ''' Return a bool ''' 
     return v.lower() in ("yes", "true", "t", "1")
   
 class AboutDialog(QtGui.QDialog, about.Ui_DialogAbout):
@@ -61,7 +63,7 @@ class AboutDialog(QtGui.QDialog, about.Ui_DialogAbout):
 
 
 
-class LaunchXdsThread(QtCore.QThread):
+class XdsThread(QtCore.QThread):
     '''
     Thread to launch XDS
     '''
@@ -72,15 +74,34 @@ class LaunchXdsThread(QtCore.QThread):
         self.sendTextMessage("Running XDS in the path: " + self.runFolder)
         e = execution.getClass(config.Config().getPar("Common","execution"),
                                 self.runFolder)
-        e.execute(config.Config().getPar("XDS","xds_bin"))
+        e.execute(config.Config().getParTestFile("XDS","xds_bin"))
+        self.sendTextMessage("Waiting for XDS to finish. Check the terminal window.")
         e.wait()
         e.finish()
         self.sendTextMessage("XDS done...")
     
-    
     def sendTextMessage(self,text):
         self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(text))
 
+class XscaleThread(QtCore.QThread):
+    '''
+    Thread to launch XSCALE
+    '''
+    def __init__(self, runFolder, parent = None):
+        QtCore.QThread.__init__(self, parent)
+        self.runFolder = runFolder
+    def run(self):
+        self.sendTextMessage("Running XSCALE in the path: " + self.runFolder)
+        e = execution.getClass(config.Config().getPar("Common","execution"),
+                                self.runFolder)
+        e.execute(config.Config().getParTestFile("XDS","xscale_bin"))
+        self.sendTextMessage("Waiting for XSCALE to finish. Check the terminal window.")
+        e.wait()
+        e.finish()
+        self.sendTextMessage("XSCALE done...")
+    
+    def sendTextMessage(self,text):
+        self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(text))
 
 class MyApp(QtGui.QMainWindow, Ui_MainWindow): 
     """
@@ -97,6 +118,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # initialise gui text fields
         self.lineEditRefDsPattern.setText(config.Config().getPar("Common","find_ref_pattern"))
         self.lineEditRemainingDSsPattern.setText(config.Config().getPar("Common","find_remaining_pattern"))
+        self.lineEditResolution.setText(config.Config().getPar("Common","default_resolution"))
+        self.friedelsLaw = True
+        
         # About
         self.popDialog=AboutDialog()
     
@@ -120,6 +144,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         # window 
         self.setWindowTitle('Hierarchical Cluster Analysis')
+        self.log('Working folder: ' + os.getcwd())
+        
 
     
     def openAbout(self):
@@ -226,8 +252,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         if self.radioButtonFriedelFalse.isChecked() : 
             paramsDict["FRIEDEL'S_LAW"] = 'FALSE'
+            self.friedelsLaw = False
         elif self.radioButtonFriedelTrue.isChecked() :
             paramsDict["FRIEDEL'S_LAW"] = 'TRUE'
+            self.friedelsLaw = True
         else :
             self.logE('ERRROR radioButtonFriedelTrue...')
             return
@@ -236,9 +264,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.ctrl.modifyXdsInpFile(refDS,paramsDict)
     
         # XDS Thread
-        self.lauchXdsThread = LaunchXdsThread(refDS)
-        self.connect(self.lauchXdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
-        self.lauchXdsThread.start()
+        self.xdsThread = XdsThread(refDS)
+        self.connect(self.xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
+        self.xdsThread.start()
         
         
     def searchRemainingDSs(self):
@@ -308,10 +336,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 #self.textBrowser.insertHtml('Processing dataset <b>' + ds+ '</b><br>')
                 dataSetsToProcessInXds.append(ds)
                 # modify XDS files
-                self.data.modifyCellAndSgInXdsIniFile(ds)
-                self.data.addReferenceDsInXdsIniFile(ds,refDS)               
+                #self.data.modifyCellAndSgInXdsIniFile(ds)
+                #self.data.addReferenceDsInXdsIniFile(ds,refDS)               
                 # submit to condor
-                self.data.processXdsJob(ds)
+                #self.data.processXdsJob(ds)
                 
             if col2.checkState() > 0 :
                 #self.textBrowser.insertHtml('Including in XSCALE <b>' + ds + '</b><br>')
@@ -326,33 +354,46 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 #                print ':(',
         
         
-        # TODO 
-        #####################################################################
+        # TODO
+        # controller.addReferenceDataSetToAllXdsInpFiles
+        # Add same cell as reference 
         
-        if len(dataSetsToProcessInXds)>0:
-            #check OAR state
-            self.thread.start()
         
+        
+        
+        # Process all data sets
+        xdsThreads=[]
+        for ds in dataSetsToProcessInXds:
+            xdsThread = XdsThread(ds)
+            self.connect(xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
+            xdsThread.start()
+            xdsThreads.append(xdsThread)
 #       
         if len(dataSetsToIncludeInXscale) > 0:
 
-            if self.lineEditResolution.text() is not None and len(str(self.lineEditResolution.text()).strip()) > 0 :
+            if self.lineEditResolution.text() is not None \
+            and len(str(self.lineEditResolution.text()).strip()) > 0 :
                 resolution = str(self.lineEditResolution.text())
             else:
-                resolution = '2.0'
+                resolution = config.Config().getPar("Common","default_resolution")
                         
             self.log('Running XSCALE up to <b>' + resolution + '</b> A resolution')
             
+            xds = xdsHandler.XdsHandler(os.getcwd())
+            xscaleInpFilePath = xds.buildXscaleInp(dataSetsToIncludeInXscale, 
+                                                   self.friedelsLaw,resolution)
             
             if self.checkBoxNedit.checkState() > 0 :
-                editWithNedit = True
-            else:
-                editWithNedit = False
+                os.system(config.Config().getPar("Common","text_editor") + " " + xscaleInpFilePath)
             
-            processThread = threading.Thread(target=self.data.includeListOfDataSetsInXscale, args=(refDS,dataSetsToIncludeInXscale,resolution,editWithNedit,self.thread,))
-            processThread.start()
-    
-            #self.data.includeListOfDataSetsInXscale(dataSetsToIncludeInXscale,resolution)
+            # TODO Launch thread
+            xscaleThread = XscaleThread(xscaleInpFilePath)
+            self.connect(xscaleThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
+            xscaleThread.start()
+            
+            xds.parseXscaleLpFile()
+            xds.createCcMatrix()
+            xds.plotDendrogram()
         else:
             self.logE('No selected DSs to be included in XSCALE!')
             
@@ -392,6 +433,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
+    
     app = QtGui.QApplication(sys.argv)
     window = MyApp()
     window.show()

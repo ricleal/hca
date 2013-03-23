@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '../ui/form.ui'
+# Form implementation generated from reading ui file 'ui/form.ui'
 #
-# Created: Wed Mar 13 15:52:18 2013
+# Created: Sat Mar 23 12:49:00 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,13 +59,13 @@ class Ui_MainWindow(object):
         self.pushButtonCellDetails.setGeometry(QtCore.QRect(490, 70, 111, 27))
         self.pushButtonCellDetails.setObjectName(_fromUtf8("pushButtonCellDetails"))
         self.lineEditUnitCell = QtGui.QLineEdit(self.centralwidget)
-        self.lineEditUnitCell.setGeometry(QtCore.QRect(110, 140, 311, 25))
+        self.lineEditUnitCell.setGeometry(QtCore.QRect(110, 140, 341, 25))
         self.lineEditUnitCell.setObjectName(_fromUtf8("lineEditUnitCell"))
         self.lineEditSpaceGroup = QtGui.QLineEdit(self.centralwidget)
         self.lineEditSpaceGroup.setGeometry(QtCore.QRect(10, 140, 81, 25))
         self.lineEditSpaceGroup.setObjectName(_fromUtf8("lineEditSpaceGroup"))
         self.label = QtGui.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(10, 120, 81, 16))
+        self.label.setGeometry(QtCore.QRect(10, 120, 91, 16))
         self.label.setObjectName(_fromUtf8("label"))
         self.label_2 = QtGui.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(110, 120, 161, 16))
@@ -81,6 +81,7 @@ class Ui_MainWindow(object):
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
         self.lineEditResolution = QtGui.QLineEdit(self.centralwidget)
         self.lineEditResolution.setGeometry(QtCore.QRect(290, 450, 71, 21))
+        self.lineEditResolution.setText(_fromUtf8(""))
         self.lineEditResolution.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lineEditResolution.setObjectName(_fromUtf8("lineEditResolution"))
         self.label_3 = QtGui.QLabel(self.centralwidget)
@@ -116,7 +117,7 @@ class Ui_MainWindow(object):
         self.line_3.setObjectName(_fromUtf8("line_3"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 797, 24))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 797, 25))
         self.menubar.setDefaultUp(False)
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuHelp = QtGui.QMenu(self.menubar)
@@ -149,7 +150,6 @@ class Ui_MainWindow(object):
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Unit Cell Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonProcessRefDS.setText(QtGui.QApplication.translate("MainWindow", "Process Ref Data set", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonProcessAllDS.setText(QtGui.QApplication.translate("MainWindow", "Process all Data sets", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditResolution.setText(QtGui.QApplication.translate("MainWindow", "2.0", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Resolution up to:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Friedel\'s law", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonFriedelTrue.setText(QtGui.QApplication.translate("MainWindow", "True", None, QtGui.QApplication.UnicodeUTF8))

@@ -121,7 +121,7 @@ class SerialExecution(Execution):
     
     def execute(self, command):
         '''
-        Just sends the the command to be executed in a shell
+        Just sends the the command to be executed in a shell wthin a thread
         '''
         logger.info("Starting 1 thread with the command: " + command)
         self.t = threading.Thread(target=self.run, args=(command,))
@@ -200,7 +200,7 @@ class OarExecution(Execution):
         
         if os.path.isfile(jobFilePath) :
             
-            command =  config.Config().getPar("OAR","sub") + \
+            command =  config.Config().getParTestFile("OAR","sub") + \
             " --stdout=" + config.Config().getPar("OAR","stdout_job") + \
             " --stderr=" + config.Config().getPar("OAR","stderr_job") + \
             " --name="   + jobName + \
@@ -231,15 +231,21 @@ class OarExecution(Execution):
         """
         Waits for all threads to complete their job
         """
-        command = config.Config().getPar("OAR","stat") + ' -u ' + getpass.getuser() + \
+        command = config.Config().getParTestFile("OAR","stat") + ' -u ' + getpass.getuser() + \
         " | %s %s"%(config.Config().getPar("Common","get"),self.oarJobName)
         pid,output = self.run(command)
-        while output is not None and len(output)>0 :
+        
+        timeout = int(config.Config().getPar("Common","execution_timeout"))
+        secondsToSleep = 5;
+        
+        while output is not None and len(output)>0 and timeout >= 0:
             self.sendTextMessage(output.strip())
-            output="Sleeping for 10 seconds: Waiting for the jobs to stop..."
-            #self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(output))
-            self.sendTextMessage(output.strip())
-            time.sleep(10)
+            
+            logger.info("Sleeping for %d seconds: Waiting %d seconds for the jobs to stop..."\
+                        %(secondsToSleep,timeout))
+            
+            time.sleep(secondsToSleep)
+            timeout-=secondsToSleep
             pid,output = self.run(command)
         #self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString("OAR Job(s) finished"))
         
@@ -252,17 +258,19 @@ class OarExecution(Execution):
 if __name__ == "__main__":
     
     # Serial
-    serial = getClass('SerialExecution')
-    pid,out = serial.run('sleep 0')
-    print pid
+    serial = getClass('SerialExecution','/tmp')
+    pid,out = serial.run('pwd')
+    print pid,'->', out
+    
+    command = config.Config().getParTestFile("XDS","xds_bin")
     
     serial = getClass('SerialExecution','.')
-    serial.execute('sleep 1')
+    serial.execute(command)
     serial.wait()
     serial.finish()
     
     oar = getClass('OarExecution','/tmp')
-    oar.execute('ls')
+    oar.execute(command)
     oar.wait()
     oar.finish()
     

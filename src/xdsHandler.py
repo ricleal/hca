@@ -23,6 +23,7 @@ import shutil
 import datetime
 
 # local imports
+import clusterAnalysis
 import airspeed 
 import config
 import log
@@ -154,7 +155,7 @@ class XdsHandler :
         self.__makeDir(self.xscaleFolderPath) 
         
         loader = airspeed.CachingFileLoader(".") 
-        template = loader.load_template(config.Config().getPar("XDS","xscale_template_file_name"))
+        template = loader.load_template(config.Config().getParTestFile("XDS","xscale_template_file_name"))
         
         # inputs for the template
         dict = {}
@@ -169,6 +170,7 @@ class XdsHandler :
         fp = open(self.xscaleInpFilePath,'w')
         fp.writelines(outFileContents)
         fp.close()
+        return self.xscaleInpFilePath
     
     def parseXscaleLpFile(self):
         """
@@ -249,6 +251,12 @@ class XdsHandler :
         
         f.close()
         
+    def plotDendrogram(self):
+        ''' To move somewhere else '''
+        logger.info('Building the Dendrogram...')
+        dendro = clusterAnalysis.ClusterAnalysis(self.ccMatFilePath)
+        dendro.plotDendogram()
+        
                
     
 if __name__ == "__main__":
@@ -275,3 +283,5 @@ if __name__ == "__main__":
     xds.parseXscaleLpFile()
     print xds.ccList
     xds.createCcMatrix()
+
+
