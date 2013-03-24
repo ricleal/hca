@@ -317,13 +317,17 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         Once XDS done, submit jobs to XSCALE
         """
         
-        self.log('Processing all the selected data sets.')
+        self.log('Processing all the selected data sets...')
         
         model =  self.table.model()
         dataSetsToIncludeInXscale = []
         dataSetsToProcessInXds = []
         
         refDS = str(self.comboBoxRefDS.currentText())
+        if refDS is None or refDS == "":
+            self.logE("Please select a reference data set!")
+            return
+        
         
         for row in range(model.rowCount()):
             
@@ -333,17 +337,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             
             ds = str(col0) 
             if col1.checkState() > 0 :
-                #self.textBrowser.insertHtml('Processing dataset <b>' + ds+ '</b><br>')
                 dataSetsToProcessInXds.append(ds)
-                # modify XDS files
-                #self.data.modifyCellAndSgInXdsIniFile(ds)
-                #self.data.addReferenceDsInXdsIniFile(ds,refDS)               
-                # submit to condor
-                #self.data.processXdsJob(ds)
                 
             if col2.checkState() > 0 :
-                #self.textBrowser.insertHtml('Including in XSCALE <b>' + ds + '</b><br>')
-                
                 dataSetsToIncludeInXscale.append(ds)
             
 #            if col1.checkState() == QtCore.Qt.Checked : # 2
@@ -354,20 +350,21 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 #                print ':(',
         
         
-        # TODO
-        # controller.addReferenceDataSetToAllXdsInpFiles
-        # Add same cell as reference 
-        
-        
-        
-        
-        # Process all data sets
-        xdsThreads=[]
-        for ds in dataSetsToProcessInXds:
-            xdsThread = XdsThread(ds)
-            self.connect(xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
-            xdsThread.start()
-            xdsThreads.append(xdsThread)
+        if len(dataSetsToProcessInXds) > 0 :
+            # Process all data sets
+            self.log('Adding the reference data set to the selected data sets...')
+            self.ctrl.addReferenceDataSetToAllXdsInpFiles(refDS, dataSetsToProcessInXds)
+            
+            xdsThreads=[]
+            for ds in dataSetsToProcessInXds:
+                xdsThread = XdsThread(ds)
+                self.connect(xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
+                xdsThread.start()
+                xdsThreads.append(xdsThread)
+            logger.info("Waiting for the XDS threads to do their job...")
+            # Wait for all of them to finish
+            [x.wait() for x in xdsThreads]
+            logger.info("Done...")
 #       
         if len(dataSetsToIncludeInXscale) > 0:
 
@@ -379,21 +376,20 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                         
             self.log('Running XSCALE up to <b>' + resolution + '</b> A resolution')
             
-            xds = xdsHandler.XdsHandler(os.getcwd())
-            xscaleInpFilePath = xds.buildXscaleInp(dataSetsToIncludeInXscale, 
-                                                   self.friedelsLaw,resolution)
-            
+            xscaleBaseFolder = os.getcwd()
+            xscaleInpFilePath = self.ctrl.buildXscaleInpFile(xscaleBaseFolder,dataSetsToIncludeInXscale,self.friedelsLaw,resolution)
+                    
             if self.checkBoxNedit.checkState() > 0 :
                 os.system(config.Config().getPar("Common","text_editor") + " " + xscaleInpFilePath)
-            
+    
             # TODO Launch thread
-            xscaleThread = XscaleThread(xscaleInpFilePath)
+            xscaleThread = XscaleThread(xscaleBaseFolder)
             self.connect(xscaleThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
             xscaleThread.start()
             
-            xds.parseXscaleLpFile()
-            xds.createCcMatrix()
-            xds.plotDendrogram()
+            
+            self.ctrl.buildDendrogram(xscaleBaseFolder)
+    
         else:
             self.logE('No selected DSs to be included in XSCALE!')
             

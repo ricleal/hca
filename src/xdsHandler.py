@@ -40,12 +40,16 @@ class XdsHandler :
         @param path : folder where the XDS files are
         """
         
+        if not os.path.exists(path) :
+            logger.error("Impossible to create an XDS handler without a path that does not exist: " + path)
+        
         logger.debug("Initialising XDS Handler with : " + path)
         
         # make sure that path is a folder
         if not os.path.isdir(path):
             path =  os.path.dirname(path)
         
+        logger.debug("Update : Initialising XDS Handler with : " + path)
 
         self.xdsInpFilePath = os.path.join(path,
                                            config.Config().getPar("XDS","inp_file_name"))
@@ -61,11 +65,22 @@ class XdsHandler :
         self.ccMatFilePath = os.path.join(self.xscaleFolderPath,
                                            config.Config().getPar("R","cc_matrix_file_name"))
         
-        
+#        logger.debug("self.xdsInpFilePath: " + self.xdsInpFilePath )
+#        logger.debug("self.xdsHklFilePath: " + self.xdsHklFilePath)
+#        logger.debug("self.xscaleFolderPath: " + self.xscaleFolderPath)
+#        logger.debug("self.xscaleInpFilePath:" + self.xscaleInpFilePath)
+#        logger.debug("self.xscaleLpFilePath: " + self.xscaleLpFilePath)
+#        logger.debug("self.ccMatFilePath: " + self.ccMatFilePath)
+
 
         # dicts
         self.xdsInpDic = collections.OrderedDict()
         self.xdsHklDic = collections.OrderedDict()
+        
+    def __eq__(self, other):
+        ''' Probably need more comparisons here  '''
+        return self.xdsInpFilePath == other.xdsInpFilePath 
+
     
     def parseXdsInpFile(self):
         """
@@ -81,7 +96,7 @@ class XdsHandler :
             if commentCharacterPos >= 0 :
                 # if the line has a comment
                 line = line[:commentCharacterPos]
-            line = line.strip()
+            line = line.strip()                
             splittedLine = re.split("([a-zA-Z0-9_\-'\(\)]+)=",line)
             splittedLine = [i.strip() for i in splittedLine]
             self.xdsInpDic.update(zip(splittedLine[1:][::2], splittedLine[1:][1::2]))
@@ -251,11 +266,6 @@ class XdsHandler :
         
         f.close()
         
-    def plotDendrogram(self):
-        ''' To move somewhere else '''
-        logger.info('Building the Dendrogram...')
-        dendro = clusterAnalysis.ClusterAnalysis(self.ccMatFilePath)
-        dendro.plotDendogram()
         
                
     
