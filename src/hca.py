@@ -63,45 +63,38 @@ class AboutDialog(QtGui.QDialog, about.Ui_DialogAbout):
 
 
 
-class XdsThread(QtCore.QThread):
-    '''
-    Thread to launch XDS
-    '''
-    def __init__(self, runFolder, parent = None):
+
+class WorkThread(QtCore.QThread):
+    def __init__(self, parent=None, target=None, args=()):
+        """
+        This class is meant for heavy lifing that has to happen in a separate
+        thread, to keep the UI responding.  It will take a callable `target'
+        and execute it in a separate thread with the given `args'.  Please
+        note that a reference to the thread object will be pre-pendend to the
+        arguments list passed to the callable, to allow acces to the methods
+        provided by this class to modify the progress bar used to show the
+        user the progress of the work executed in the thread.
+        """
+        
         QtCore.QThread.__init__(self, parent)
-        self.runFolder = runFolder
+        self.target = target
+        self.args = args #(self,) + args
+        #self.sendTextMessage('Initializing thread for target %s'%target)
+
     def run(self):
-        self.sendTextMessage("Running XDS in the path: " + self.runFolder)
-        e = execution.getClass(config.Config().getPar("Common","execution"),
-                                self.runFolder)
-        e.execute(config.Config().getParTestFile("XDS","xds_bin"))
-        self.sendTextMessage("Waiting for XDS to finish. Check the terminal window.")
-        e.wait()
-        e.finish()
-        self.sendTextMessage("XDS done...")
+        """
+        This method is run in a separate thread by Qt.  Don't call this method
+        explicitly: it is called implicitly after calling the `start()'
+        method.  Executes the given target with the given arguments, prepended
+        with a reference to this thread instance.
+        """
+        if self.target:
+            self.target(*self.args)
     
     def sendTextMessage(self,text):
         self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(text))
 
-class XscaleThread(QtCore.QThread):
-    '''
-    Thread to launch XSCALE
-    '''
-    def __init__(self, runFolder, parent = None):
-        QtCore.QThread.__init__(self, parent)
-        self.runFolder = runFolder
-    def run(self):
-        self.sendTextMessage("Running XSCALE in the path: " + self.runFolder)
-        e = execution.getClass(config.Config().getPar("Common","execution"),
-                                self.runFolder)
-        e.execute(config.Config().getParTestFile("XDS","xscale_bin"))
-        self.sendTextMessage("Waiting for XSCALE to finish. Check the terminal window.")
-        e.wait()
-        e.finish()
-        self.sendTextMessage("XSCALE done...")
-    
-    def sendTextMessage(self,text):
-        self.emit(QtCore.SIGNAL("output(QString)"),QtCore.QString(text))
+
 
 class MyApp(QtGui.QMainWindow, Ui_MainWindow): 
     """
@@ -264,7 +257,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.ctrl.modifyXdsInpFile(refDS,paramsDict)
     
         # XDS Thread
-        self.xdsThread = XdsThread(refDS)
+        self.xdsThread = WorkThread(target=self.ctrl.runXds, args=(refDS,))
         self.connect(self.xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
         self.xdsThread.start()
         
@@ -357,7 +350,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             
             xdsThreads=[]
             for ds in dataSetsToProcessInXds:
-                xdsThread = XdsThread(ds)
+                # XDS Thread
+                xdsThread =  WorkThread(target=self.ctrl.runXds, args=(ds,))
                 self.connect(xdsThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
                 xdsThread.start()
                 xdsThreads.append(xdsThread)
@@ -383,7 +377,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 os.system(config.Config().getPar("Common","text_editor") + " " + xscaleInpFilePath)
     
             # TODO Launch thread
-            xscaleThread = XscaleThread(xscaleBaseFolder)
+            xscaleThread = WorkThread(target=self.ctrl.runXscale, args=(xscaleBaseFolder,)) 
             self.connect(xscaleThread, QtCore.SIGNAL("output(QString)"), self.addLineToTextBrowser)
             xscaleThread.start()
             

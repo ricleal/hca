@@ -54,9 +54,9 @@ class Execution:
             if os.path.isfile(runFolder):
                 runFolder = os.path.abspath(runFolder)
                 runFolder = os.path.dirname(runFolder)
-            logger.info("Changing to folder: " + runFolder)
-            os.chdir(runFolder)
+            #os.chdir(runFolder)
             self.runFolder = runFolder
+        logger.info("Exec running in folder: " + runFolder)
         self.sub_init()
             
     
@@ -102,7 +102,7 @@ class Execution:
 
     def finish(self):
         """ """
-        os.chdir(self.initialDir)
+        #os.chdir(self.initialDir)
         self.sub_finish()
 
 
@@ -119,12 +119,41 @@ class SerialExecution(Execution):
         logger.debug("Constructor SerialExecution...")
         pass
     
+    def __createCommand(self, command, path ):
+        """
+        
+        
+        """
+        thisfileFolderPath = os.path.dirname(inspect.getfile( inspect.currentframe() ))
+        inp = open( os.path.join(thisfileFolderPath,
+                                 config.Config().getParTestFile("XDS","xds_run_template_file_name")), 'r')
+        t = Template(inp.read())
+        
+        s = t.substitute(command=command,path=path)
+        
+        completePath = os.path.join(self.runFolder,
+                                    config.Config().getPar("XDS","xds_run_file_name"))
+        outp = open(completePath, 'w')
+        outp.write(s)
+        outp.close()
+        
+        #os.system('chmod +x ' + completePath)
+        st = os.stat(completePath)
+        os.chmod(completePath, st.st_mode | stat.S_IEXEC)
+        logger.info("Serial EXEC: created run file: " + completePath)
+        return completePath
+    
+    
     def execute(self, command):
         '''
         Just sends the the command to be executed in a shell wthin a thread
         '''
-        logger.info("Starting 1 thread with the command: " + command)
-        self.t = threading.Thread(target=self.run, args=(command,))
+        
+        completePath = self.__createCommand(command,self.runFolder) 
+        
+        logger.info("Starting 1 thread with the command: " + completePath)
+        
+        self.t = threading.Thread(target=self.run, args=(completePath,))
         self.t.start()
         
     def wait(self):

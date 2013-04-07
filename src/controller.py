@@ -8,6 +8,7 @@ import glob
 import os
 import sys
 
+import execution
 import clusterAnalysis
 import xdsHandler
 import config
@@ -114,7 +115,26 @@ class Controller:
         xds.createCcMatrix()
         dendro = clusterAnalysis.ClusterAnalysis(xds.ccMatFilePath)
         dendro.plotDendogram()
+    
+    def runXds(self,baseFolder):
+        logger.info("Running XDS in the path: " + baseFolder)
+        e = execution.getClass(config.Config().getPar("Common","execution"),
+                                baseFolder)
+        e.execute(config.Config().getParTestFile("XDS","xds_bin"))
+        logger.info("Waiting for XDS to finish. Check the terminal window.")
+        e.wait()
+        e.finish()
+        logger.info("XDS done...")
 
+    def runXscale(self,baseFolder):
+        logger.info("Running XDS in the path: " + baseFolder)
+        e = execution.getClass(config.Config().getPar("Common","execution"),
+                                baseFolder)
+        e.execute(config.Config().getParTestFile("XDS","xds_bin"))
+        logger.info("Waiting for XDS to finish. Check the terminal window.")
+        e.wait()
+        e.finish()
+        logger.info("XDS done...")
         
                 
                 

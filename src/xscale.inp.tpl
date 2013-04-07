@@ -2,7 +2,7 @@
 !
 ! based on : http://xds.mpimf-heidelberg.mpg.de/html_doc/INPUT_templates/XSCALE.INP
 ! 
-! Feel free to uncomment the lines below
+! Feel free to uncomment the lines below and run xscale your self.
 !
 
 
