@@ -136,29 +136,45 @@ class Controller:
         e.finish()
         logger.info("XDS done...")
         
-                
-                
-    
-if __name__ == "__main__":
-    os.system("cp -r ../data/* /tmp/")
+import unittest
 
-    
-    c = Controller()
+class TestController(unittest.TestCase):
 
-    os.chdir('/tmp')        
-    
-    inpFile = '/tmp/xds_x2_run1_1/XDS,INP'
-    print c.getDetailsFromInpFile(inpFile)
-    
-    logger.debug("getDetailsFromHKLFile")    
-    dictFields = {'SPACE_GROUP_NUMBER' : '1',
+    def setUp(self):
+        os.system("cp -r ../data/* /tmp/")
+        self.c = Controller()
+        os.chdir('/tmp')        
+
+
+    def test_getDetailsFromInpFile(self):
+        inpFile = '/tmp/xds_x2_run1_1/XDS.INP'
+        self.c.getDetailsFromInpFile(inpFile)
+        logger.debug("getDetailsFromHKLFile")    
+        dictFields = {'SPACE_GROUP_NUMBER' : '1',
                   'UNIT_CELL_CONSTANTS' : '10 10 10 90 90 90',
                   "FRIEDEL'S_LAW" : 'FALSE' }
-    c.modifyXdsInpFile(inpFile,dictFields)
+        self.c.modifyXdsInpFile(inpFile,dictFields)
+        
+        xds = xdsHandler.XdsHandler(inpFile)
+        xds.parseXdsInpFile()
+        
+        self.assertEqual(dictFields['SPACE_GROUP_NUMBER'],
+                         xds.xdsInpDic['SPACE_GROUP_NUMBER'])
     
-    logger.debug("addReferenceDataSetToAllXdsInpFiles")    
-    listOfDS = ['xds_x2_run3_1/XDS.INP','xds_x2_run5_1/XDS.INP','xds_x2_run7_1/XDS.INP']
-    c.addReferenceDataSetToAllXdsInpFiles('xds_x2_run1_1/',listOfDS)
+    def test_addReferenceDataSetToAllXdsInpFiles(self):
+        logger.debug("addReferenceDataSetToAllXdsInpFiles")    
+        listOfDS = ['xds_x2_run3_1/XDS.INP','xds_x2_run5_1/XDS.INP','xds_x2_run7_1/XDS.INP']
+        self.c.addReferenceDataSetToAllXdsInpFiles('xds_x2_run1_1/',listOfDS)
+        
+        for ds in listOfDS:
+            fullPath = os.path.join(os.getcwd(),ds)
+            xds = xdsHandler.XdsHandler(fullPath)
+            xds.parseXdsInpFile()
+            keyWord = config.Config().getPar('XDS','reference_data_set_keyword')
+            
+            self.assertTrue( 'xds_x2_run1_1/' in xds.xdsInpDic[keyWord] )
+        
+
     
-                 
-    
+if __name__ == "__main__":
+    unittest.main()
