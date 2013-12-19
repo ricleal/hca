@@ -1,3 +1,6 @@
+
+See Development Branch!!!
+
 #Hierarchical Cluster Analysis GUI#
 
 ##Please cite:##
@@ -26,3 +29,5 @@ OAR batch scheduler) : http://oar.imag.fr/
 
 Currently, the HCA only works within the ESRF beamline environment.
 
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ricleal/hca/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
